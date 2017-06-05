@@ -32,10 +32,11 @@ def make_impulse_timeseries(dt,Nt,TI,TI_sigma,rng_seed = set()):
 
     # generate impulse time-series
     ts_data = zeros(Nt)
-    for i in range(0,Nk):
+    for i in xrange(0,Nk):
         ts_data[int(TItis[i])] = 1
     
-    ts_time = arange(dt,(Nt+1)*dt,dt)
+    ts_time = linspace(dt,Nt*dt, num = Nt)
+
     ts = Series(ts_data,ts_time)
     # ts.TimeInfo.Units = 'seconds';
     # ts = setuniformtime(ts,'StartTime',dt);

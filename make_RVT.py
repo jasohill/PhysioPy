@@ -5,17 +5,15 @@ from pandas import *
 from pylab import *
 from make_pulse_timeseries  import make_pulse_timeseries
 
-def make_RVT(dt,Nt,RTI = 4.0,RTI_sigma = 0.25,weight = 75.0,A_sigma = 0.005, impulse_seed = set(),dz_seed = set()):
+def make_RVT(dt,Nt,RTI = 4.0,RTI_sigma = 0.25,weight = 75.0,A_sigma = 0.005,D_sigma = 0.005,impulse_seed = set(),dz_seed = set()):
     """ Generates a respiratory volume time-series (RVT) characterized by 
-    average respiratory time RTI with variance var_RTI for a person of 
-    a specific weight [kg] (optional), variance in amplitude A_sigma, with 
-    random seeds for the impulse time series generation, impulse_seed, and
+    average respiratory time RTI with RTI_sigma for a person of 
+    a specific weight [kg] (optional), sigma of amplitude A_sigma, sigma of drift D_sigma,  
+    with random seeds for the impulse time series generation, impulse_seed, and
     for the chest displacement time series generation, dz_seed.
-    Outputs are in units of mL, listed as: 
+    Outputs are in units of mL/cc, listed as:
     FRC - Functional Residual Capacity, the lung volume left after a normal exhalation
     TIV - Typical Inspiratory Volume, the lung volume after normal inhalation.
-    IRV - Inspiratory Reserve Volume (IRV), the lung volume after taking the
-          largest inhalation possible
     """
 
     """
@@ -29,7 +27,7 @@ def make_RVT(dt,Nt,RTI = 4.0,RTI_sigma = 0.25,weight = 75.0,A_sigma = 0.005, imp
 
     # generate the respiratory motion time-series
 
-    z_ts = make_pulse_timeseries(dt,Nt,RTI,RTI_sigma,p = 4.0,A_sigma = A_sigma,impulse_seed = impulse_seed,dz_seed = dz_seed)
+    z_ts = make_pulse_timeseries(dt,Nt,RTI,RTI_sigma,p = 4.0,A_sigma = A_sigma,D_sigma = D_sigma, impulse_seed = impulse_seed,dz_seed = dz_seed)
 
     """ Average lung volume parameters as detailed in the thesis 
     "Simulation of an Artificial Respiratory System"
@@ -59,7 +57,7 @@ def make_RVT(dt,Nt,RTI = 4.0,RTI_sigma = 0.25,weight = 75.0,A_sigma = 0.005, imp
     TIV = (4.0*pi*weight/300.0)*(a+0.58)*(b+0.58)*(c+0.58)
     RVT_Data = list((4.0*pi*weight/300.0)*(a+deltaR)*(b+deltaR)*(c+deltaR))
 
-    ts_time = arange(dt,(Nt+1)*dt,dt)
+    ts_time = linspace(dt,Nt*dt, num = Nt)
     
     RVT = Series(RVT_Data, index=ts_time)
 #    RVT.TimeInfo.Units = 'seconds'

@@ -8,7 +8,7 @@ import numpy as np
 from make_impulse_timeseries  import make_impulse_timeseries 
 
 
-def make_pulse_timeseries(dt,Nt,TI = 4.0,TI_sigma = 0.25,p = 4.0,A_sigma = 0.005, impulse_seed = set(),dz_seed = set()):
+def make_pulse_timeseries(dt,Nt,TI = 4.0,TI_sigma = 0.25,p = 4.0,A_sigma = 0.005,D_sigma = 0.005, impulse_seed = set(),dz_seed = set()):
     """
     Generates a timeseries of pulsation events characterized by 
     interval time TI between pulses with standard deviation TI_sigma
@@ -30,16 +30,18 @@ def make_pulse_timeseries(dt,Nt,TI = 4.0,TI_sigma = 0.25,p = 4.0,A_sigma = 0.005
     PIs[1:N-1] = np.round(0.5*(PIs[0:N-2] + PIs[1:N-1]))
     PIs = 2*np.round(0.5*PIs)+1; #ensure odd durations 
 
-    z_ts_Data = zeros(Nt)
+    ts_time = linspace(dt,Nt*dt, num = Nt)
 
     if (dz_seed != set()):
         seed(dz_seed)
-        
-    As = A_sigma*standard_normal((N,)) + 1.0*(PIs*dt)/TI
+
+    z_ts_Data = zeros(Nt) + D_sigma*standard_normal((1,))*cos(pi*ts_time) + D_sigma*standard_normal((1,))*cos(pi*ts_time/2) + D_sigma*standard_normal((1,))*cos(pi*ts_time/3) + D_sigma*standard_normal((1,))*cos(pi*ts_time/5) + D_sigma*standard_normal((1,))*cos(pi*ts_time/7) + D_sigma*standard_normal((1,))*cos(pi*ts_time/11) + D_sigma*standard_normal((1,))*cos(pi*ts_time/13) + D_sigma*standard_normal((1,))*cos(pi*ts_time/17) + D_sigma*standard_normal((1,))*cos(pi*ts_time/19) + D_sigma*standard_normal((1,))*cos(pi*ts_time/23) + D_sigma*standard_normal((1,))*cos(pi*ts_time/29)
+    # amplitude with variability        
+    As = 0.5*sqrt(2.0)*A_sigma*standard_normal((N,)) + 1.0*(PIs*dt)/TI
     if (indices[0] - 0.5*(PIs[0]+1)) < 0:
         start_i = 0.5*(PIs[0]+1)-indices[0]-1
         phi = array(range(start_i,PIs[0]))
-        z_phi = As[0]*cos(pi*(phi - 0.5*(PIs[0]+1))/PIs[0])**p
+        z_phi = As[0]*cos(pi*(phi - 0.5*(PIs[0]+1))/PIs[0])**p;
         z_ts_Data[:len(phi)] = z_phi + z_ts_Data[:len(phi)]
     else:
         phi = array(range(0,int(PIs[0])))
@@ -60,8 +62,6 @@ def make_pulse_timeseries(dt,Nt,TI = 4.0,TI_sigma = 0.25,p = 4.0,A_sigma = 0.005
         phi = array(range(0,int(PIs[N-1])))
         z_phi = As[N-1]*cos(pi*(phi - 0.5*(PIs[N-1]+1))/PIs[N-1])**p
         z_ts_Data[int((indices[N-1] - 0.5*(PIs[N-1]-1)) - 1):int(indices[N-1] + 0.5*(PIs[N-1]-1))] = z_phi + z_ts_Data[int((indices[N-1] - 0.5*(PIs[N-1]-1))-1):int(indices[N-1] + 0.5*(PIs[N-1]-1))]
-    
-    ts_time = arange(dt,(Nt+1)*dt,dt)
     
     z_ts = Series(z_ts_Data, index=ts_time)
     #z_ts.TimeInfo.Units = 'seconds';
